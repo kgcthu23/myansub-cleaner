@@ -13,8 +13,8 @@ export const FileUpload: React.FC<{ onFileSelect: (content: string, fileName: st
 
     return (
         <div className="w-full max-w-2xl mx-auto">
-            <label htmlFor="file-upload" className="relative cursor-pointer glass-panel rounded-3xl border border-emerald-500/30 flex flex-col items-center justify-center p-16 hover:bg-zinc-800/40 transition-all duration-300 group hover:shadow-[0_0_50px_rgba(16,185,129,0.15)]">
-                <UploadCloud className="w-12 h-12 text-emerald-400 mb-6 group-hover:-translate-y-2 transition-transform duration-300 drop-shadow-[0_0_20px_rgba(16,185,129,0.4)]" />
+            <label htmlFor="file-upload" className="relative cursor-pointer bg-zinc-900/40 backdrop-blur-md rounded-2xl border-2 border-dashed border-indigo-500/50 flex flex-col items-center justify-center p-14 hover:bg-zinc-800/60 transition-all duration-300 group shadow-[0_0_30px_rgba(99,102,241,0.1)] hover:shadow-[0_0_40px_rgba(99,102,241,0.2)]">
+                <UploadCloud className="w-10 h-10 text-indigo-400 mb-4 group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
                 <span className="mt-2 text-lg font-semibold text-zinc-200">Click to upload or drag and drop</span>
                 <span className="text-sm text-zinc-500 mt-1">SRT files only</span>
                 <input id="file-upload" type="file" className="sr-only" accept=".srt" onChange={handleFileChange} disabled={disabled} />
