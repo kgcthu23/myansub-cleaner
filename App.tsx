@@ -33,6 +33,7 @@ export default function App() {
     const [appState, setAppState] = useState<AppState>('idle');
     const [activeView, setActiveView] = useState<AppView>('cleaner');
     const [showNotesTab, setShowNotesTab] = useState(false);
+    const [showSecretMessage, setShowSecretMessage] = useState(false);
 
     const [isAppUnlocked, setIsAppUnlocked] = useState(true);
     const [loginUser, setLoginUser] = useState('');
@@ -64,7 +65,7 @@ export default function App() {
         setShowCanvaModal(false);
     };
 
-    const { loveEffects, handleSecretClick } = useSecretClick(() => setShowNotesTab(true));
+    const { loveEffects, handleSecretClick } = useSecretClick(() => setShowSecretMessage(true));
 
     const { 
         originalContent, cleanedContent, summary, foreignReport, 
@@ -256,6 +257,24 @@ export default function App() {
                 <CanvaMailModal isOpen={showCanvaModal} onClose={handleCloseCanvaModal} />
             </Suspense>
             */}
+
+            {showSecretMessage && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" onClick={() => setShowSecretMessage(false)}>
+                    <div className="bg-zinc-900/90 border border-pink-500/30 p-8 rounded-2xl shadow-2xl max-w-md text-center transform transition-all" onClick={e => e.stopPropagation()}>
+                        <div className="text-4xl mb-4 animate-bounce">💌</div>
+                        <p className="text-zinc-200 text-lg leading-relaxed font-medium">
+                            U deserve the greatest love, Thu Thu. I miss u.<br/><br/>
+                            <span className="text-pink-400 italic">*Sending hugs... I hope everything is okay.*</span>
+                        </p>
+                        <button 
+                            onClick={() => setShowSecretMessage(false)}
+                            className="mt-8 px-6 py-2 bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 border border-pink-500/30 rounded-xl transition-colors font-medium"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <style>{`
                 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
