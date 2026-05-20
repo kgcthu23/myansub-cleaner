@@ -18,13 +18,14 @@ export function useSecretClick(onUnlock?: () => void) {
         if (newCount >= 4) {
             setSecretClickCount(0);
             
+            // NOTE: Secret link and note feature temporarily disabled per user request
+            /*
             if (onUnlock) {
                 onUnlock();
             }
 
-
-
             window.open('https://drive.google.com/drive/u/0/folders/16j0H2tw4-xbK2Vb9VAzqzmZa9Edxprju', '_blank');
+            */
         } else {
             setSecretClickCount(newCount);
         }
