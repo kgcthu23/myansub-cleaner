@@ -5,7 +5,7 @@ import type { ChangeSummary, ForeignLanguageReport, IncomeData, IncomeEntry, Det
 import {
     UploadCloud, Download, AlertTriangle,
     LayoutDashboard, Calculator, BookOpen, Sparkles,
-    ArrowRight, CheckCircle2, Trash2, Link as LinkIcon, Info, MessageSquare, Copy, Palette, ArrowLeft, Image as ImageIcon, Lock
+    ArrowRight, CheckCircle2, Trash2, Link as LinkIcon, Info, MessageSquare, Copy, Palette, ArrowLeft, Image as ImageIcon, Lock, Mail
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx, type ClassValue } from 'clsx';
@@ -22,6 +22,7 @@ const Guide = lazy(() => import('./components/Guide').then(module => ({ default:
 const ProjectNotes = lazy(() => import('./components/ProjectNotes').then(module => ({ default: module.ProjectNotes })));
 const DopamineDispenser = lazy(() => import('./components/DopamineDispenser').then(module => ({ default: module.DopamineDispenser })));
 const CanvaMailModal = lazy(() => import('./components/CanvaMailModal').then(module => ({ default: module.CanvaMailModal })));
+const CongratsModal = lazy(() => import('./components/CongratsModal').then(module => ({ default: module.CongratsModal })));
 
 import { useSrtCleaner } from './hooks/useSrtCleaner';
 import { useSecretClick } from './hooks/useSecretClick';
@@ -34,6 +35,7 @@ export default function App() {
     const [activeView, setActiveView] = useState<AppView>('cleaner');
     const [showNotesTab, setShowNotesTab] = useState(false);
     const [showSecretMessage, setShowSecretMessage] = useState(false);
+    const [showCongratsModal, setShowCongratsModal] = useState(false);
 
     const [isAppUnlocked, setIsAppUnlocked] = useState(true);
     const [loginUser, setLoginUser] = useState('');
@@ -63,6 +65,18 @@ export default function App() {
     const handleCloseCanvaModal = () => {
         localStorage.setItem('hasSeenCanvaMailNotice', 'true');
         setShowCanvaModal(false);
+    };
+
+    useEffect(() => {
+        const hasSeenCongrats = localStorage.getItem('hasSeenCongratsModal');
+        if (!hasSeenCongrats) {
+            setShowCongratsModal(true);
+        }
+    }, []);
+
+    const handleCloseCongrats = () => {
+        localStorage.setItem('hasSeenCongratsModal', 'true');
+        setShowCongratsModal(false);
     };
 
     const { loveEffects, handleSecretClick } = useSecretClick(() => setShowSecretMessage(true));
@@ -164,6 +178,16 @@ export default function App() {
                             <h1 className="text-4xl sm:text-5xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 pb-2">
                                 Translator's Toolkit
                             </h1>
+                            <button
+                                onClick={() => setShowCongratsModal(true)}
+                                className="mt-3 inline-flex items-center gap-2 px-3.5 py-1.5 bg-gradient-to-r from-pink-500/10 to-purple-500/10 hover:from-pink-500/20 hover:to-purple-500/20 border border-pink-500/30 rounded-full text-pink-400 text-xs font-semibold tracking-wide transition-all hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(236,72,153,0.15)] cursor-pointer animate-pulse"
+                            >
+                                <span className="flex h-2 w-2 relative">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
+                                </span>
+                                Message for You 💌
+                            </button>
                         </div>
 
                         <div className="mt-6 flex justify-center w-full px-2 sm:px-0">
@@ -257,6 +281,30 @@ export default function App() {
                 <CanvaMailModal isOpen={showCanvaModal} onClose={handleCloseCanvaModal} />
             </Suspense>
             */}
+
+            <Suspense fallback={null}>
+                <CongratsModal isOpen={showCongratsModal} onClose={handleCloseCongrats} />
+            </Suspense>
+
+            {/* Floating Message Button */}
+            {activeView !== 'canvas' && (
+                <div className="fixed bottom-6 right-6 z-40">
+                    <button
+                        onClick={() => setShowCongratsModal(true)}
+                        className="w-14 h-14 bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg shadow-pink-500/30 border border-pink-400/20 hover:scale-110 active:scale-95 transition-all cursor-pointer group relative"
+                        title="Message for You"
+                    >
+                        <Mail className="w-5 h-5 text-white group-hover:animate-bounce" />
+                        <span className="absolute -top-1 -right-1 flex h-4 w-4">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-4 w-4 bg-pink-500 border-2 border-[#09090b]"></span>
+                        </span>
+                        <span className="absolute right-16 bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs py-1.5 px-3 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl pointer-events-none">
+                            Message for You 💌
+                        </span>
+                    </button>
+                </div>
+            )}
 
             {showSecretMessage && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" onClick={() => setShowSecretMessage(false)}>
