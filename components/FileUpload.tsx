@@ -7,7 +7,8 @@ export const FileUpload: React.FC<{ onFileSelect: (content: string, fileName: st
         removePha: true,
         removePahtSint: true,
         removeExclamation: true,
-        removeQuestion: true
+        removeQuestion: true,
+        removeEllipsis: true
     });
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,6 +48,10 @@ export const FileUpload: React.FC<{ onFileSelect: (content: string, fileName: st
                 <div className="flex items-center gap-2">
                     <input type="checkbox" id="remove-question" checked={options.removeQuestion} onChange={handleOptionChange('removeQuestion')} disabled={disabled} className="w-4 h-4 text-indigo-500 bg-zinc-900 border border-zinc-700 rounded focus:ring-indigo-500/50 focus:ring-2 cursor-pointer accent-indigo-500" />
                     <label htmlFor="remove-question" className="text-zinc-300 text-sm cursor-pointer select-none">Remove "?"</label>
+                </div>
+                <div className="flex items-center gap-2">
+                    <input type="checkbox" id="remove-ellipsis" checked={options.removeEllipsis} onChange={handleOptionChange('removeEllipsis')} disabled={disabled} className="w-4 h-4 text-indigo-500 bg-zinc-900 border border-zinc-700 rounded focus:ring-indigo-500/50 focus:ring-2 cursor-pointer accent-indigo-500" />
+                    <label htmlFor="remove-ellipsis" className="text-zinc-300 text-sm cursor-pointer select-none">Remove "..."</label>
                 </div>
             </div>
         </div>

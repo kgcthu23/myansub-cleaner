@@ -28,6 +28,7 @@ export interface PunctuationOptions {
     removePahtSint: boolean; // ။
     removeExclamation: boolean; // !
     removeQuestion: boolean; // ?
+    removeEllipsis: boolean; // ...
 }
 
 // New types for Income Tracker

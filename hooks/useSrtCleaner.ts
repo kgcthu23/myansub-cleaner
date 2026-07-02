@@ -10,7 +10,7 @@ export function useSrtCleaner() {
     const [foreignReport, setForeignReport] = useState<ForeignLanguageReport | null>(null);
     const [isCleaned, setIsCleaned] = useState<boolean>(false);
 
-    const handleFileSelect = useCallback((content: string, name: string, options: PunctuationOptions = { removePha: true, removePahtSint: true, removeExclamation: true, removeQuestion: true }) => {
+    const handleFileSelect = useCallback((content: string, name: string, options: PunctuationOptions = { removePha: true, removePahtSint: true, removeExclamation: true, removeQuestion: true, removeEllipsis: true }) => {
         setOriginalContent(content);
         const cleaned = cleanSrtContent(content, options); 
         setCleanedContent(cleaned);
