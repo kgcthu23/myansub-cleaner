@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { cleanSrtContent, detectForeignLanguages, getChangeSummary } from '../services/srtCleaner';
-import type { ChangeSummary, ForeignLanguageReport } from '../types';
+import type { ChangeSummary, ForeignLanguageReport, PunctuationOptions } from '../types';
 
 export function useSrtCleaner() {
     const [originalContent, setOriginalContent] = useState<string | null>(null);
@@ -10,11 +10,11 @@ export function useSrtCleaner() {
     const [foreignReport, setForeignReport] = useState<ForeignLanguageReport | null>(null);
     const [isCleaned, setIsCleaned] = useState<boolean>(false);
 
-    const handleFileSelect = useCallback((content: string, name: string) => {
+    const handleFileSelect = useCallback((content: string, name: string, options: PunctuationOptions = { removePha: true, removePahtSint: true, removeExclamation: true, removeQuestion: true, removeEllipsis: true }) => {
         setOriginalContent(content);
-        const cleaned = cleanSrtContent(content); 
+        const cleaned = cleanSrtContent(content, options); 
         setCleanedContent(cleaned);
-        const summaryData = getChangeSummary(content); 
+        const summaryData = getChangeSummary(content, options); 
         setSummary(summaryData);
         const reportData = detectForeignLanguages(cleaned); 
         setForeignReport(reportData);

@@ -1,4 +1,4 @@
-import type { ForeignLanguageReport, ChangeSummary } from '../types';
+import type { ForeignLanguageReport, ChangeSummary, PunctuationOptions } from '../types';
 
 const languagePatterns: { [key: string]: RegExp } = {
     'Thai': /[ก-๙]/,
@@ -98,7 +98,7 @@ const fixSrtFormat = (content: string): { fixedContent: string, count: number } 
 };
 
 
-export const cleanSrtContent = (content: string): string => {
+export const cleanSrtContent = (content: string, options: PunctuationOptions = { removePha: true, removePahtSint: true, removeExclamation: true, removeQuestion: true, removeEllipsis: true }): string => {
     // 1. Fix major SRT format issues first
     let { fixedContent: cleaned } = fixSrtFormat(content);
     
@@ -111,8 +111,22 @@ export const cleanSrtContent = (content: string): string => {
     cleaned = cleaned.replace(/\[[^\]]*\]/g, '');
     cleaned = cleaned.replace(/\([^)]*\)/g, '');
 
-    // 4. Remove Myanmar character
-    cleaned = cleaned.replace(/။/g, '');
+    // 4. Remove specific punctuation marks
+    const charsToRemove = [];
+    if (options.removePha) charsToRemove.push('၊');
+    if (options.removePahtSint) charsToRemove.push('။');
+    if (options.removeExclamation) charsToRemove.push('!');
+    if (options.removeQuestion) charsToRemove.push('?');
+
+    if (charsToRemove.length > 0) {
+        const regex = new RegExp(`[${charsToRemove.join('')}]`, 'g');
+        cleaned = cleaned.replace(regex, '');
+    }
+
+    if (options.removeEllipsis) {
+        cleaned = cleaned.replace(/\.{3,}/g, '');
+        cleaned = cleaned.replace(/…/g, '');
+    }
 
     // 5. Remove speaker labels with more specific rules
     const speakerCleanedLines = cleaned.split('\n').map(line => {
@@ -173,8 +187,8 @@ export const cleanSrtContent = (content: string): string => {
     return cleaned.trim();
 };
 
-export const getChangeSummary = (originalContent: string): ChangeSummary => {
-    const cleanedContent = cleanSrtContent(originalContent);
+export const getChangeSummary = (originalContent: string, options: PunctuationOptions = { removePha: true, removePahtSint: true, removeExclamation: true, removeQuestion: true, removeEllipsis: true }): ChangeSummary => {
+    const cleanedContent = cleanSrtContent(originalContent, options);
     const foreignLanguages = detectForeignLanguages(cleanedContent);
     
     const { count: formatFixesCount } = fixSrtFormat(originalContent);
@@ -193,6 +207,18 @@ export const getChangeSummary = (originalContent: string): ChangeSummary => {
 
     const speakerLabelsRemoved = burmeseMatches + englishMatches + genericMatches;
 
+    const charsToRemove = [];
+    if (options.removePha) charsToRemove.push('၊');
+    if (options.removePahtSint) charsToRemove.push('။');
+    if (options.removeExclamation) charsToRemove.push('!');
+    if (options.removeQuestion) charsToRemove.push('?');
+    const punctuationRegex = charsToRemove.length > 0 ? new RegExp(`[${charsToRemove.join('')}]`, 'g') : null;
+
+    let ellipsisCount = 0;
+    if (options.removeEllipsis) {
+        ellipsisCount = (originalContent.match(/\.{3,}/g) || []).length + (originalContent.match(/…/g) || []).length;
+    }
+
     return {
         formatFixes: formatFixesCount,
         backslashesRemoved: (originalContent.match(/\\/g) || []).length,
@@ -202,7 +228,7 @@ export const getChangeSummary = (originalContent: string): ChangeSummary => {
         parensRemoved: (originalContent.match(/\([^)]*\)/g) || []).length,
         speakerLabelsRemoved,
         hyphensRemoved: (originalContent.match(/^[-\s]*$/gm) || []).length,
-        myanmarCharsRemoved: (originalContent.match(/။/g) || []).length,
+        punctuationRemoved: (punctuationRegex ? (originalContent.match(punctuationRegex) || []).length : 0) + ellipsisCount,
         dialoguesSplit: (originalContent.match(/^.* -.*$/gm) || []).length,
         foreignLinesCount: Object.keys(foreignLanguages).length,
     };
