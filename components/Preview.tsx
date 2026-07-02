@@ -12,7 +12,7 @@ export const ChangeSummaryDisplay: React.FC<{ summary: ChangeSummary }> = ({ sum
         { label: 'Parentheses Removed', value: summary.parensRemoved },
         { label: 'Speaker Labels Removed', value: summary.speakerLabelsRemoved },
         { label: 'Empty Hyphen Lines Removed', value: summary.hyphensRemoved },
-        { label: 'Myanmar Characters Removed', value: summary.myanmarCharsRemoved },
+        { label: 'Punctuation Removed', value: summary.punctuationRemoved },
         { label: 'Multi-dialogue Lines Split', value: summary.dialoguesSplit },
     ].filter(item => item.value > 0);
 

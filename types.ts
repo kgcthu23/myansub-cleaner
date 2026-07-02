@@ -17,10 +17,17 @@ export interface ChangeSummary {
   parensRemoved: number;
   speakerLabelsRemoved: number;
   hyphensRemoved: number;
-  myanmarCharsRemoved: number;
+  punctuationRemoved: number;
   dialoguesSplit: number;
   foreignLinesCount: number;
   formatFixes: number;
+}
+
+export interface PunctuationOptions {
+    removePha: boolean; // ၊
+    removePahtSint: boolean; // ။
+    removeExclamation: boolean; // !
+    removeQuestion: boolean; // ?
 }
 
 // New types for Income Tracker

@@ -1,7 +1,7 @@
 
 import React, { useState, useCallback, useMemo, useEffect, lazy, Suspense } from 'react';
 import { cleanSrtContent, detectForeignLanguages, getChangeSummary } from './services/srtCleaner';
-import type { ChangeSummary, ForeignLanguageReport, IncomeData, IncomeEntry, DetectedLanguageInfo } from './types';
+import type { ChangeSummary, ForeignLanguageReport, IncomeData, IncomeEntry, DetectedLanguageInfo, PunctuationOptions } from './types';
 import {
     UploadCloud, Download, AlertTriangle,
     LayoutDashboard, Calculator, BookOpen, Sparkles,
@@ -86,8 +86,8 @@ export default function App() {
         handleFileSelect: onFileSelect, handleDownload, resetCleaner
     } = useSrtCleaner();
 
-    const handleFileSelect = useCallback((content: string, name: string) => {
-        onFileSelect(content, name);
+    const handleFileSelect = useCallback((content: string, name: string, options?: PunctuationOptions) => {
+        onFileSelect(content, name, options);
         setAppState('preview');
     }, [onFileSelect]);
 

@@ -34,7 +34,7 @@ export const CongratsModal: React.FC<CongratsModalProps> = ({ isOpen, onClose })
                         <div className="relative h-32 bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-indigo-500/20 flex items-center justify-center border-b border-zinc-900/60">
                             {/* Glowing overlay */}
                             <div className="absolute inset-0 bg-radial-gradient from-purple-500/10 to-transparent blur-xl pointer-events-none" />
-                            
+
                             <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center border border-pink-400/30 shadow-[0_0_20px_rgba(236,72,153,0.4)] animate-pulse">
                                 <Mail className="w-8 h-8 text-white" />
                             </div>
@@ -87,7 +87,7 @@ export const CongratsModal: React.FC<CongratsModalProps> = ({ isOpen, onClose })
                                 <div className="border-t border-zinc-900/50 my-2" />
                                 <p className="text-zinc-400">
                                     <span className="font-bold text-indigo-400 mr-1.5">Update for me:</span>
-                                    Im now doing translating work for another movie website called msub. I am at home most of the time. I even asked for a job to ko arkar but all positions are filled so i found a job here instead.
+                                    Im now doing translating work for another movie website called msub. I am at home most of the time. I even asked for a job to ko arkar but all positions are filled so i found a job here instead. I'm just sp
                                 </p>
                             </div>
 
