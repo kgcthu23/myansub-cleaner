@@ -76,7 +76,7 @@ export const SpecialMessageModal: React.FC<SpecialMessageModalProps> = ({ isOpen
                                     like bro u dont know how amazing you are to me
                                 </p>
                                 <p>
-                                    သုသုကို directly သေချာမပြောလိုက်ရလို့ရယ် topic က awkward ဖြစ်မှာစိုးလို့ ဒီမှာလာပြောတာ။ အကိုလည်း ရည်းစားထားစောသွားတယ်။
+                                    သုသုကိုတိုက်ရိုက် သေချာမပြောလိုက်ရလို့ရယ် topic က awkward ဖြစ်မှာစိုးလို့ ဒီမှာလာပြောတာ။ အကိုလည်း ရည်းစားထားစောသွားတယ်။
                                 </p>
                                 <p className="leading-relaxed">
                                     သုသုနဲ့ရှိတဲ့ကာလတွေက အကို့အတွက် အမှတ်တရအဖြစ်ဆုံးကာလတွေပဲ သုံးနှစ်တာဆိုပေမယ့် အကောင်းဆုံးသုံးနှစ်ပဲ ဖြစ်နိုင်ရင်ပြန်အသွားချင်ဆုံးပါပဲ။ we could talk for hours and hours without getting bored. သုသု u are always my safest comfort place. u always have a special place in me (my butthole).
