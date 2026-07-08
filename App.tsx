@@ -23,7 +23,6 @@ const ProjectNotes = lazy(() => import('./components/ProjectNotes').then(module 
 const DopamineDispenser = lazy(() => import('./components/DopamineDispenser').then(module => ({ default: module.DopamineDispenser })));
 const CanvaMailModal = lazy(() => import('./components/CanvaMailModal').then(module => ({ default: module.CanvaMailModal })));
 const CongratsModal = lazy(() => import('./components/CongratsModal').then(module => ({ default: module.CongratsModal })));
-const SpecialMessageModal = lazy(() => import('./components/SpecialMessageModal').then(module => ({ default: module.SpecialMessageModal })));
 
 import { useSrtCleaner } from './hooks/useSrtCleaner';
 import { useSecretClick } from './hooks/useSecretClick';
@@ -37,7 +36,6 @@ export default function App() {
     const [showNotesTab, setShowNotesTab] = useState(false);
     const [showSecretMessage, setShowSecretMessage] = useState(false);
     const [showCongratsModal, setShowCongratsModal] = useState(false);
-    const [showSpecialModal, setShowSpecialModal] = useState(false);
 
     const [isAppUnlocked, setIsAppUnlocked] = useState(true);
     const [loginUser, setLoginUser] = useState('');
@@ -81,17 +79,6 @@ export default function App() {
         setShowCongratsModal(false);
     };
 
-    useEffect(() => {
-        const hasSeenSpecial = localStorage.getItem('hasSeenSpecialMessageModal');
-        if (!hasSeenSpecial) {
-            setShowSpecialModal(true);
-        }
-    }, []);
-
-    const handleCloseSpecial = () => {
-        localStorage.setItem('hasSeenSpecialMessageModal', 'true');
-        setShowSpecialModal(false);
-    };
 
     const { loveEffects, handleSecretClick } = useSecretClick(() => setShowSecretMessage(true));
 
@@ -298,7 +285,6 @@ export default function App() {
 
             <Suspense fallback={null}>
                 <CongratsModal isOpen={showCongratsModal} onClose={handleCloseCongrats} />
-                <SpecialMessageModal isOpen={showSpecialModal} onClose={handleCloseSpecial} />
             </Suspense>
 
             {/* Floating Message Button */}
