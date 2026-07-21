@@ -1,5 +1,6 @@
 
 import React, { useState, useCallback, useMemo, useEffect, lazy, Suspense } from 'react';
+import JSZip from 'jszip';
 import { cleanSrtContent, detectForeignLanguages, getChangeSummary } from './services/srtCleaner';
 import type { ChangeSummary, ForeignLanguageReport, IncomeData, IncomeEntry, DetectedLanguageInfo, PunctuationOptions } from './types';
 import {
@@ -22,7 +23,6 @@ const Guide = lazy(() => import('./components/Guide').then(module => ({ default:
 const ProjectNotes = lazy(() => import('./components/ProjectNotes').then(module => ({ default: module.ProjectNotes })));
 const DopamineDispenser = lazy(() => import('./components/DopamineDispenser').then(module => ({ default: module.DopamineDispenser })));
 const CanvaMailModal = lazy(() => import('./components/CanvaMailModal').then(module => ({ default: module.CanvaMailModal })));
-const CongratsModal = lazy(() => import('./components/CongratsModal').then(module => ({ default: module.CongratsModal })));
 
 import { useSrtCleaner } from './hooks/useSrtCleaner';
 import { useSecretClick } from './hooks/useSecretClick';
@@ -35,8 +35,6 @@ export default function App() {
     const [activeView, setActiveView] = useState<AppView>('cleaner');
     const [showNotesTab, setShowNotesTab] = useState(false);
     const [showSecretMessage, setShowSecretMessage] = useState(false);
-    const [showCongratsModal, setShowCongratsModal] = useState(false);
-
     const [isAppUnlocked, setIsAppUnlocked] = useState(true);
     const [loginUser, setLoginUser] = useState('');
     const [loginPass, setLoginPass] = useState('');
@@ -67,30 +65,45 @@ export default function App() {
         setShowCanvaModal(false);
     };
 
-    useEffect(() => {
-        const hasSeenCongrats = localStorage.getItem('hasSeenCongratsModal');
-        if (!hasSeenCongrats) {
-            setShowCongratsModal(true);
-        }
-    }, []);
-
-    const handleCloseCongrats = () => {
-        localStorage.setItem('hasSeenCongratsModal', 'true');
-        setShowCongratsModal(false);
-    };
-
-
     const { loveEffects, handleSecretClick } = useSecretClick(() => setShowSecretMessage(true));
 
     const {
-        originalContent, cleanedContent, summary, foreignReport,
-        handleFileSelect: onFileSelect, handleDownload, resetCleaner
+        files, isCleaned,
+        handleFilesSelect: onFilesSelect, resetCleaner
     } = useSrtCleaner();
+    const [selectedFileIndex, setSelectedFileIndex] = useState(0);
 
-    const handleFileSelect = useCallback((content: string, name: string, options?: PunctuationOptions) => {
-        onFileSelect(content, name, options);
+    const handleFilesSelect = useCallback((filesData: {content: string, name: string}[], options?: PunctuationOptions) => {
+        onFilesSelect(filesData, options);
+        setSelectedFileIndex(0);
         setAppState('preview');
-    }, [onFileSelect]);
+    }, [onFilesSelect]);
+
+    const handleDownloadAll = async () => {
+        if (files.length === 0) return;
+        if (files.length === 1) {
+            const blob = new Blob([files[0].cleanedContent], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a'); 
+            link.href = url; 
+            link.download = files[0].fileName;
+            link.click(); 
+            URL.revokeObjectURL(url);
+            return;
+        }
+
+        const zip = new JSZip();
+        files.forEach(file => {
+            zip.file(file.fileName, file.cleanedContent);
+        });
+        const content = await zip.generateAsync({ type: 'blob' });
+        const url = URL.createObjectURL(content);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'cleaned_subtitles.zip';
+        link.click();
+        URL.revokeObjectURL(url);
+    };
 
     const handleReset = () => {
         resetCleaner();
@@ -134,7 +147,25 @@ export default function App() {
                         </button>
                     </form>
                 </div>
-                <style>{`
+                {showSecretMessage && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" onClick={() => setShowSecretMessage(false)}>
+                    <div className="bg-zinc-900/90 border border-pink-500/30 p-8 rounded-2xl shadow-2xl max-w-md text-center transform transition-all" onClick={e => e.stopPropagation()}>
+                        <div className="text-4xl mb-4 animate-bounce">💌</div>
+                        <p className="text-zinc-200 text-lg leading-relaxed font-medium">
+                            I miss u a lot, thu thu...<br /><br />
+                            <span className="text-pink-400 italic">*Sending hugs* I hope everything is okay with u.</span>
+                        </p>
+                        <button
+                            onClick={() => setShowSecretMessage(false)}
+                            className="mt-8 px-6 py-2 bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 border border-pink-500/30 rounded-xl transition-colors font-medium"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            <style>{`
                     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
                     .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
                     @keyframes blob { 0% { transform: translate(0px, 0px) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } 100% { transform: translate(0px, 0px) scale(1); } }
@@ -179,16 +210,7 @@ export default function App() {
                             <h1 className="text-4xl sm:text-5xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 pb-2">
                                 Translator's Toolkit
                             </h1>
-                            <button
-                                onClick={() => setShowCongratsModal(true)}
-                                className="mt-3 inline-flex items-center gap-2 px-3.5 py-1.5 bg-gradient-to-r from-pink-500/10 to-purple-500/10 hover:from-pink-500/20 hover:to-purple-500/20 border border-pink-500/30 rounded-full text-pink-400 text-xs font-semibold tracking-wide transition-all hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(236,72,153,0.15)] cursor-pointer animate-pulse"
-                            >
-                                <span className="flex h-2 w-2 relative">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
-                                </span>
-                                Message for You 💌
-                            </button>
+
                         </div>
 
                         <div className="mt-6 flex justify-center w-full px-2 sm:px-0">
@@ -221,17 +243,38 @@ export default function App() {
                             <AnimatePresence mode="wait">
                                 {activeView === 'cleaner' && (
                                     <motion.div key="cleaner" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-                                        {appState === 'idle' ? <FileUpload onFileSelect={handleFileSelect} disabled={false} /> :
-                                            originalContent && cleanedContent && summary && foreignReport && (
-                                                <div className="space-y-8 animate-fade-in">
-                                                    <div className="bg-zinc-900/40 backdrop-blur-xl p-6 rounded-2xl shadow-xl border border-zinc-800/50 sticky top-4 z-10 flex flex-col sm:flex-row justify-between items-center gap-4">
-                                                        <h2 className="text-xl font-bold text-zinc-100">Review Changes</h2>
-                                                        <div className="flex gap-3">
-                                                            <button onClick={handleReset} className="px-4 py-2 text-sm font-semibold text-zinc-300 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700/50 rounded-lg transition-colors">Clean Another</button>
-                                                            <button onClick={handleDownload} className="px-5 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-500 shadow-lg shadow-indigo-500/20 flex items-center transition-all"><Download className="w-4 h-4 mr-2" /> Download</button>
+                                        {appState === 'idle' ? <FileUpload onFilesSelect={handleFilesSelect} disabled={false} /> :
+                                            files.length > 0 && (
+                                                <div className="space-y-8 animate-fade-in flex flex-col xl:flex-row gap-6">
+                                                    {files.length > 1 && (
+                                                        <div className="w-full xl:w-64 flex-shrink-0 bg-zinc-900/40 backdrop-blur-xl p-4 rounded-2xl shadow-xl border border-zinc-800/50 max-h-[70vh] overflow-y-auto">
+                                                            <h3 className="text-sm font-bold text-zinc-400 mb-4 px-2 uppercase tracking-wider">Cleaned Files</h3>
+                                                            <div className="space-y-1">
+                                                                {files.map((file, index) => (
+                                                                    <button
+                                                                        key={index}
+                                                                        onClick={() => setSelectedFileIndex(index)}
+                                                                        className={`w-full text-left px-3 py-2 rounded-lg text-sm truncate transition-colors ${index === selectedFileIndex ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'}`}
+                                                                    >
+                                                                        {file.fileName}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
                                                         </div>
+                                                    )}
+                                                    <div className="flex-1 space-y-8">
+                                                        <div className="bg-zinc-900/40 backdrop-blur-xl p-6 rounded-2xl shadow-xl border border-zinc-800/50 sticky top-4 z-10 flex flex-col sm:flex-row justify-between items-center gap-4">
+                                                            <div className="flex flex-col">
+                                                                <h2 className="text-xl font-bold text-zinc-100">Review Changes</h2>
+                                                                {files.length > 1 && <span className="text-sm text-zinc-400">{files[selectedFileIndex].fileName}</span>}
+                                                            </div>
+                                                            <div className="flex gap-3">
+                                                                <button onClick={handleReset} className="px-4 py-2 text-sm font-semibold text-zinc-300 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700/50 rounded-lg transition-colors">Start Over</button>
+                                                                <button onClick={handleDownloadAll} className="px-5 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-500 shadow-lg shadow-indigo-500/20 flex items-center transition-all"><Download className="w-4 h-4 mr-2" /> {files.length > 1 ? 'Download All (Zip)' : 'Download'}</button>
+                                                            </div>
+                                                        </div>
+                                                        {files[selectedFileIndex] && <Preview originalContent={files[selectedFileIndex].originalContent} cleanedContent={files[selectedFileIndex].cleanedContent} summary={files[selectedFileIndex].summary} foreignReport={files[selectedFileIndex].foreignReport} />}
                                                     </div>
-                                                    <Preview originalContent={originalContent} cleanedContent={cleanedContent} summary={summary} foreignReport={foreignReport} />
                                                 </div>
                                             )}
                                     </motion.div>
@@ -265,7 +308,7 @@ export default function App() {
                             Translator's Toolkit &copy; 2026
                         </p>
                         <p className="mt-2 text-sm text-zinc-500">
-                            Made for <span onClick={handleSecretClick} className="relative inline-block transition-colors duration-300 hover:text-pink-400 cursor-pointer group font-bold select-none py-1">
+                            Made for <span onClick={handleSecretClick} className="relative inline-block transition-colors duration-300 hover:text-pink-400 cursor-pointer group font-bold select-none py-1 text-zinc-400">
                                 Thu Zue Zue San
                                 <span className="demo2-heart1 absolute -top-1 left-[10%] text-pink-500 text-[10px] opacity-0 pointer-events-none">❤️</span>
                                 <span className="demo2-heart2 absolute top-1 left-[40%] text-purple-500 text-[14px] opacity-0 pointer-events-none">💖</span>
@@ -283,36 +326,14 @@ export default function App() {
             </Suspense>
             */}
 
-            <Suspense fallback={null}>
-                <CongratsModal isOpen={showCongratsModal} onClose={handleCloseCongrats} />
-            </Suspense>
 
-            {/* Floating Message Button */}
-            {activeView !== 'canvas' && (
-                <div className="fixed bottom-6 right-6 z-40">
-                    <button
-                        onClick={() => setShowCongratsModal(true)}
-                        className="w-14 h-14 bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg shadow-pink-500/30 border border-pink-400/20 hover:scale-110 active:scale-95 transition-all cursor-pointer group relative"
-                        title="Message for You"
-                    >
-                        <Mail className="w-5 h-5 text-white group-hover:animate-bounce" />
-                        <span className="absolute -top-1 -right-1 flex h-4 w-4">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-4 w-4 bg-pink-500 border-2 border-[#09090b]"></span>
-                        </span>
-                        <span className="absolute right-16 bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs py-1.5 px-3 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl pointer-events-none">
-                            Message for You 💌
-                        </span>
-                    </button>
-                </div>
-            )}
 
             {showSecretMessage && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" onClick={() => setShowSecretMessage(false)}>
                     <div className="bg-zinc-900/90 border border-pink-500/30 p-8 rounded-2xl shadow-2xl max-w-md text-center transform transition-all" onClick={e => e.stopPropagation()}>
                         <div className="text-4xl mb-4 animate-bounce">💌</div>
                         <p className="text-zinc-200 text-lg leading-relaxed font-medium">
-                            I miss u and I still dream of u once in a while. You deserve the greatest love.<br /><br />
+                            I miss u a lot, thu thu...<br /><br />
                             <span className="text-pink-400 italic">*Sending hugs* I hope everything is okay with u.</span>
                         </p>
                         <button
@@ -344,6 +365,8 @@ export default function App() {
                 .group:hover .demo2-heart1 { animation: floatHeart 1.2s infinite ease-out; }
                 .group:hover .demo2-heart2 { animation: floatHeart 1.4s infinite ease-out 0.2s; }
                 .group:hover .demo2-heart3 { animation: floatHeart 1.3s infinite ease-out 0.4s; }
+
+
             `}</style>
         </div>
     );

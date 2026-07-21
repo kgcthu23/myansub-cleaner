@@ -1,54 +1,38 @@
 import { useState, useCallback } from 'react';
 import { cleanSrtContent, detectForeignLanguages, getChangeSummary } from '../services/srtCleaner';
-import type { ChangeSummary, ForeignLanguageReport, PunctuationOptions } from '../types';
+import type { PunctuationOptions, SrtFileResult } from '../types';
 
 export function useSrtCleaner() {
-    const [originalContent, setOriginalContent] = useState<string | null>(null);
-    const [cleanedContent, setCleanedContent] = useState<string | null>(null);
-    const [fileName, setFileName] = useState<string>('cleaned.srt');
-    const [summary, setSummary] = useState<ChangeSummary | null>(null);
-    const [foreignReport, setForeignReport] = useState<ForeignLanguageReport | null>(null);
+    const [files, setFiles] = useState<SrtFileResult[]>([]);
     const [isCleaned, setIsCleaned] = useState<boolean>(false);
 
-    const handleFileSelect = useCallback((content: string, name: string, options: PunctuationOptions = { removePha: true, removePahtSint: true, removeExclamation: true, removeQuestion: true, removeEllipsis: true }) => {
-        setOriginalContent(content);
-        const cleaned = cleanSrtContent(content, options); 
-        setCleanedContent(cleaned);
-        const summaryData = getChangeSummary(content, options); 
-        setSummary(summaryData);
-        const reportData = detectForeignLanguages(cleaned); 
-        setForeignReport(reportData);
-        setFileName(name.replace(/\.srt$/i, '') + '_cleaned.srt');
+    const handleFilesSelect = useCallback((fileDataList: {content: string, name: string}[], options: PunctuationOptions = { removePha: true, removePahtSint: true, removeExclamation: true, removeQuestion: true, removeEllipsis: true }) => {
+        const processedFiles = fileDataList.map(fileData => {
+            const cleaned = cleanSrtContent(fileData.content, options); 
+            const summaryData = getChangeSummary(fileData.content, options); 
+            const reportData = detectForeignLanguages(cleaned); 
+            return {
+                originalContent: fileData.content,
+                cleanedContent: cleaned,
+                summary: summaryData,
+                foreignReport: reportData,
+                fileName: fileData.name.replace(/\.srt$/i, '') + '_cleaned.srt'
+            };
+        });
+        
+        setFiles(processedFiles);
         setIsCleaned(true);
     }, []);
 
-    const handleDownload = useCallback(() => {
-        if (!cleanedContent) return;
-        const blob = new Blob([cleanedContent], { type: 'text/plain;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a'); 
-        link.href = url; 
-        link.download = fileName;
-        link.click(); 
-        URL.revokeObjectURL(url);
-    }, [cleanedContent, fileName]);
-
     const resetCleaner = useCallback(() => {
-        setOriginalContent(null);
-        setCleanedContent(null);
-        setSummary(null);
-        setForeignReport(null);
+        setFiles([]);
         setIsCleaned(false);
     }, []);
 
     return {
-        originalContent,
-        cleanedContent,
-        summary,
-        foreignReport,
+        files,
         isCleaned,
-        handleFileSelect,
-        handleDownload,
+        handleFilesSelect,
         resetCleaner
     };
 }

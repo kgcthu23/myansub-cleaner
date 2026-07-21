@@ -23,6 +23,14 @@ export interface ChangeSummary {
   formatFixes: number;
 }
 
+export interface SrtFileResult {
+  originalContent: string;
+  cleanedContent: string;
+  summary: ChangeSummary;
+  foreignReport: ForeignLanguageReport;
+  fileName: string;
+}
+
 export interface PunctuationOptions {
     removePha: boolean; // ၊
     removePahtSint: boolean; // ။
