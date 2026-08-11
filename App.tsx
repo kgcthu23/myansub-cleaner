@@ -23,6 +23,7 @@ const Guide = lazy(() => import('./components/Guide').then(module => ({ default:
 const ProjectNotes = lazy(() => import('./components/ProjectNotes').then(module => ({ default: module.ProjectNotes })));
 const DopamineDispenser = lazy(() => import('./components/DopamineDispenser').then(module => ({ default: module.DopamineDispenser })));
 const CanvaMailModal = lazy(() => import('./components/CanvaMailModal').then(module => ({ default: module.CanvaMailModal })));
+const InstructionVideoModal = lazy(() => import('./components/InstructionVideoModal').then(module => ({ default: module.InstructionVideoModal })));
 
 import { useSrtCleaner } from './hooks/useSrtCleaner';
 import { useSecretClick } from './hooks/useSecretClick';
@@ -52,17 +53,28 @@ export default function App() {
     };
 
     const [showCanvaModal, setShowCanvaModal] = useState<boolean>(false);
+    const [showInstructionVideoModal, setShowInstructionVideoModal] = useState<boolean>(false);
 
     useEffect(() => {
         const hasSeenCanvaMail = localStorage.getItem('hasSeenCanvaMailNotice');
         if (!hasSeenCanvaMail) {
             setShowCanvaModal(true);
         }
+
+        const hasSeenInstructionNotice = localStorage.getItem('hasSeenInstructionVideoNotice');
+        if (!hasSeenInstructionNotice) {
+            setShowInstructionVideoModal(true);
+        }
     }, []);
 
     const handleCloseCanvaModal = () => {
         localStorage.setItem('hasSeenCanvaMailNotice', 'true');
         setShowCanvaModal(false);
+    };
+
+    const handleCloseInstructionVideoModal = () => {
+        localStorage.setItem('hasSeenInstructionVideoNotice', 'true');
+        setShowInstructionVideoModal(false);
     };
 
     const { loveEffects, handleSecretClick } = useSecretClick(() => setShowSecretMessage(true));
@@ -319,12 +331,13 @@ export default function App() {
                 </div>
             )}
 
-            {/* Temporarily removed from UI
             <Suspense fallback={null}>
-                <DopamineDispenser />
-                <CanvaMailModal isOpen={showCanvaModal} onClose={handleCloseCanvaModal} />
+                <InstructionVideoModal
+                    isOpen={showInstructionVideoModal}
+                    onClose={handleCloseInstructionVideoModal}
+                    onGoToEssential={() => setActiveView('guide')}
+                />
             </Suspense>
-            */}
 
 
 
