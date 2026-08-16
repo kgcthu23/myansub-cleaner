@@ -24,6 +24,7 @@ const ProjectNotes = lazy(() => import('./components/ProjectNotes').then(module 
 const DopamineDispenser = lazy(() => import('./components/DopamineDispenser').then(module => ({ default: module.DopamineDispenser })));
 const CanvaMailModal = lazy(() => import('./components/CanvaMailModal').then(module => ({ default: module.CanvaMailModal })));
 const InstructionVideoModal = lazy(() => import('./components/InstructionVideoModal').then(module => ({ default: module.InstructionVideoModal })));
+const LetterModal = lazy(() => import('./components/LetterModal').then(module => ({ default: module.LetterModal })));
 
 import { useSrtCleaner } from './hooks/useSrtCleaner';
 import { useSecretClick } from './hooks/useSecretClick';
@@ -35,7 +36,7 @@ export default function App() {
     const [appState, setAppState] = useState<AppState>('idle');
     const [activeView, setActiveView] = useState<AppView>('cleaner');
     const [showNotesTab, setShowNotesTab] = useState(false);
-    const [showSecretMessage, setShowSecretMessage] = useState(false);
+    const [showLetterModal, setShowLetterModal] = useState(false);
     const [isAppUnlocked, setIsAppUnlocked] = useState(true);
     const [loginUser, setLoginUser] = useState('');
     const [loginPass, setLoginPass] = useState('');
@@ -56,6 +57,11 @@ export default function App() {
     const [showInstructionVideoModal, setShowInstructionVideoModal] = useState<boolean>(false);
 
     useEffect(() => {
+        const hasSeenLetter = localStorage.getItem('hasSeenBirthdayLetter2026');
+        if (!hasSeenLetter) {
+            setShowLetterModal(true);
+        }
+
         const hasSeenCanvaMail = localStorage.getItem('hasSeenCanvaMailNotice');
         if (!hasSeenCanvaMail) {
             setShowCanvaModal(true);
@@ -67,6 +73,11 @@ export default function App() {
         }
     }, []);
 
+    const handleCloseLetterModal = () => {
+        localStorage.setItem('hasSeenBirthdayLetter2026', 'true');
+        setShowLetterModal(false);
+    };
+
     const handleCloseCanvaModal = () => {
         localStorage.setItem('hasSeenCanvaMailNotice', 'true');
         setShowCanvaModal(false);
@@ -77,7 +88,7 @@ export default function App() {
         setShowInstructionVideoModal(false);
     };
 
-    const { loveEffects, handleSecretClick } = useSecretClick(() => setShowSecretMessage(true));
+    const { loveEffects, handleSecretClick } = useSecretClick(() => setShowLetterModal(true));
 
     const {
         files, isCleaned,
@@ -159,23 +170,12 @@ export default function App() {
                         </button>
                     </form>
                 </div>
-                {showSecretMessage && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" onClick={() => setShowSecretMessage(false)}>
-                    <div className="bg-zinc-900/90 border border-pink-500/30 p-8 rounded-2xl shadow-2xl max-w-md text-center transform transition-all" onClick={e => e.stopPropagation()}>
-                        <div className="text-4xl mb-4 animate-bounce">💌</div>
-                        <p className="text-zinc-200 text-lg leading-relaxed font-medium">
-                            I miss u a lot, thu thu...<br /><br />
-                            <span className="text-pink-400 italic">*Sending hugs* I hope everything is okay with u.</span>
-                        </p>
-                        <button
-                            onClick={() => setShowSecretMessage(false)}
-                            className="mt-8 px-6 py-2 bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 border border-pink-500/30 rounded-xl transition-colors font-medium"
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
-            )}
+                <Suspense fallback={null}>
+                    <LetterModal
+                        isOpen={showLetterModal}
+                        onClose={handleCloseLetterModal}
+                    />
+                </Suspense>
 
             <style>{`
                     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -341,23 +341,12 @@ export default function App() {
 
 
 
-            {showSecretMessage && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" onClick={() => setShowSecretMessage(false)}>
-                    <div className="bg-zinc-900/90 border border-pink-500/30 p-8 rounded-2xl shadow-2xl max-w-md text-center transform transition-all" onClick={e => e.stopPropagation()}>
-                        <div className="text-4xl mb-4 animate-bounce">💌</div>
-                        <p className="text-zinc-200 text-lg leading-relaxed font-medium">
-                            I miss u a lot, thu thu...<br /><br />
-                            <span className="text-pink-400 italic">*Sending hugs* I hope everything is okay with u.</span>
-                        </p>
-                        <button
-                            onClick={() => setShowSecretMessage(false)}
-                            className="mt-8 px-6 py-2 bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 border border-pink-500/30 rounded-xl transition-colors font-medium"
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
-            )}
+            <Suspense fallback={null}>
+                <LetterModal
+                    isOpen={showLetterModal}
+                    onClose={handleCloseLetterModal}
+                />
+            </Suspense>
 
             <style>{`
                 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
