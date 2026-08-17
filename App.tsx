@@ -24,7 +24,6 @@ const ProjectNotes = lazy(() => import('./components/ProjectNotes').then(module 
 const DopamineDispenser = lazy(() => import('./components/DopamineDispenser').then(module => ({ default: module.DopamineDispenser })));
 const CanvaMailModal = lazy(() => import('./components/CanvaMailModal').then(module => ({ default: module.CanvaMailModal })));
 const InstructionVideoModal = lazy(() => import('./components/InstructionVideoModal').then(module => ({ default: module.InstructionVideoModal })));
-const LetterModal = lazy(() => import('./components/LetterModal').then(module => ({ default: module.LetterModal })));
 
 import { useSrtCleaner } from './hooks/useSrtCleaner';
 import { useSecretClick } from './hooks/useSecretClick';
@@ -36,7 +35,6 @@ export default function App() {
     const [appState, setAppState] = useState<AppState>('idle');
     const [activeView, setActiveView] = useState<AppView>('cleaner');
     const [showNotesTab, setShowNotesTab] = useState(false);
-    const [showLetterModal, setShowLetterModal] = useState(false);
     const [isAppUnlocked, setIsAppUnlocked] = useState(true);
     const [loginUser, setLoginUser] = useState('');
     const [loginPass, setLoginPass] = useState('');
@@ -57,11 +55,6 @@ export default function App() {
     const [showInstructionVideoModal, setShowInstructionVideoModal] = useState<boolean>(false);
 
     useEffect(() => {
-        const hasSeenLetter = localStorage.getItem('hasSeenBirthdayLetter2026');
-        if (!hasSeenLetter) {
-            setShowLetterModal(true);
-        }
-
         const hasSeenCanvaMail = localStorage.getItem('hasSeenCanvaMailNotice');
         if (!hasSeenCanvaMail) {
             setShowCanvaModal(true);
@@ -73,11 +66,6 @@ export default function App() {
         }
     }, []);
 
-    const handleCloseLetterModal = () => {
-        localStorage.setItem('hasSeenBirthdayLetter2026', 'true');
-        setShowLetterModal(false);
-    };
-
     const handleCloseCanvaModal = () => {
         localStorage.setItem('hasSeenCanvaMailNotice', 'true');
         setShowCanvaModal(false);
@@ -88,7 +76,7 @@ export default function App() {
         setShowInstructionVideoModal(false);
     };
 
-    const { loveEffects, handleSecretClick } = useSecretClick(() => setShowLetterModal(true));
+    const { loveEffects, handleSecretClick } = useSecretClick();
 
     const {
         files, isCleaned,
@@ -170,12 +158,6 @@ export default function App() {
                         </button>
                     </form>
                 </div>
-                <Suspense fallback={null}>
-                    <LetterModal
-                        isOpen={showLetterModal}
-                        onClose={handleCloseLetterModal}
-                    />
-                </Suspense>
 
             <style>{`
                     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -336,15 +318,6 @@ export default function App() {
                     isOpen={showInstructionVideoModal}
                     onClose={handleCloseInstructionVideoModal}
                     onGoToEssential={() => setActiveView('guide')}
-                />
-            </Suspense>
-
-
-
-            <Suspense fallback={null}>
-                <LetterModal
-                    isOpen={showLetterModal}
-                    onClose={handleCloseLetterModal}
                 />
             </Suspense>
 
